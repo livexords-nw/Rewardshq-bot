@@ -2,5 +2,6 @@
     "auto_farming": true,
     "auto_spin": true,
     "auto_task": true,
+    "delay_change_account": 30,
     "delay_iteration": 600
 }

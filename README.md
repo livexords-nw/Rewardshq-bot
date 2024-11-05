@@ -14,6 +14,7 @@ Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 |`auto_farming`|Auto claim farming|Default True|
 |`auto_spin`|Auto Spin Wheel|Default True|
 |`auto_task`|Auto Task, Basic Task, Partner Task|Default True|
+|`delay_change_account`|Delay sebelum berpindah ke akun lain|
 |`delay_iteration`|Delay sebelum melakukan restarting|Default 600|
 
 ## Installation

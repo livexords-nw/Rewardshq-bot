@@ -300,8 +300,8 @@ class Auth:
                 self.log(f"Restarting In {config["delay_iteration"]} Second")
                 time.sleep(config["delay_iteration"])
 
-            self.log(f"Moving to the next account....", Fore.CYAN)
-            time.sleep(30)
+            self.log(f"Moving to the next account in {config["delay_change_account"]}", Fore.CYAN)
+            time.sleep(config["delay_change_account"])
 
 if __name__ == "__main__":
     auth = Auth()
