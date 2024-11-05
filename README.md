@@ -1,11 +1,13 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.0.1
-**Versi v1.0.0 -> v1.0.1**
+## Versi v1.2.1
+**Versi v1.1.1 -> v1.2.1**
 
 ## Update
-1. Menambahkan requirements.txt
+1. Menambahkan Beberapa information tentang akun
+2. Urutan Farming dibenahi
+3. Tampilan direvisi
 
 ## Installation
 - Buka command prompt atau terminal, lalu jalankan perintah ini:
