@@ -1,8 +1,8 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.2.1
-**Versi v1.1.1 -> v1.2.1**
+## Versi v1.1.0
+**Versi v1.0.0 -> v1.1.0**
 
 ## Update
 1. Menambahkan Beberapa information tentang akun
