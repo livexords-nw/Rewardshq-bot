@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 from colorama import Fore
 import requests
+import json
 
 class Auth:
     BASE_URL = "https://api-rewardshq.shards.tech/v1"
@@ -27,6 +28,12 @@ class Auth:
     def banner(self):
         print("     RewardsHQ Free Bot")
         print("     This Bot Created By LIVEXORDS\n")
+
+    def load_config():
+        """Load the configuration from config.json once at the start."""
+        with open('config.json') as config_file:
+            config = json.load(config_file)
+        return config
 
     def load_queries(self, file_path):
         """Load queries from a text file."""
@@ -164,6 +171,8 @@ class Auth:
                 self.log(f"Spin failed at spin {spin_count}, message: {message}", Fore.RED)
                 break
 
+            time.sleep(5)
+
     def task(self):
         """Claim tasks from both basic-tasks and partner-tasks categories."""
         if not self.token:
@@ -189,7 +198,7 @@ class Auth:
 
                 if not is_completed and is_can_claim:
                     task_ids.append(task_id)
-                    # Klaim task menggunakan POST untuk /tasks/do-task/{task_id}
+                    
                     do_task_response = requests.post(f"{self.BASE_URL}/tasks/do-task/{task_id}", headers=headers)
 
                     if do_task_response.status_code == 200 or do_task_response.status_code == 201:
@@ -198,8 +207,10 @@ class Auth:
                         self.log(f"Failed to complete task '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
                 else:
                     self.log(f"Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
+                
+                time.sleep(5)
 
-        # Task Tipe 3: Basic Task
+        # Task Tipe 2: Basic Task
         # Mengambil basic task ID dengan GET
         self.log(f"{Fore.GREEN}Category: Basic Task")
         response = requests.get(f"{self.BASE_URL}/tasks/basic-tasks", headers=headers)
@@ -215,7 +226,7 @@ class Auth:
 
                 if not is_completed and is_can_claim:
                     task_ids.append(task_id)
-                    # Klaim task basic dengan POST untuk /tasks/basic-tasks/{task_id}
+                    
                     do_task_response = requests.post(f"{self.BASE_URL}/tasks/basic-tasks/{task_id}", headers=headers)
 
                     if do_task_response.status_code == 200 or do_task_response.status_code == 201:
@@ -225,7 +236,9 @@ class Auth:
                 else:
                     self.log(f"Basic Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
 
-        # Task Tipe 2: Partner Task
+                time.sleep(5)
+
+        # Task Tipe 3: Partner Task
         # Mengambil partner task ID dengan GET
         self.log(f"{Fore.GREEN}Category: Partner Task")
         response = requests.get(f"{self.BASE_URL}/tasks/partner-tasks", headers=headers)
@@ -241,7 +254,7 @@ class Auth:
 
                 if not is_completed and is_can_claim:
                     task_ids.append(task_id)
-                    # Klaim task partner dengan POST untuk /tasks/partner-tasks/{task_id}
+                    
                     do_task_response = requests.post(f"{self.BASE_URL}/tasks/partner-tasks/{task_id}", headers=headers)
 
                     if do_task_response.status_code == 200 or do_task_response.status_code == 201:
@@ -251,6 +264,8 @@ class Auth:
                 else:
                     self.log(f"Partner Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
 
+                time.sleep(5)
+
         self.log(f"{len(task_ids)} tasks have been successfully claimed.")
         return task_ids
 
@@ -258,22 +273,32 @@ class Auth:
     def run(self):
         """Main loop to log in and process each query for up to 6 hours."""
         index = 0
+        config = self.load_config()
 
         while True:
             self.log(f"Login To User {index+1}/{len(self.query_list)}")
             self.login(index)
-            self.log("Farming: On", Fore.GREEN)
-            self.start_farming()
-            self.log("Spin: On", Fore.GREEN)
-            self.spin()
-            self.log("Tasks: On", Fore.GREEN)
-            self.task()
+            if config["auto_farming"]:
+                self.log("Farming: On", Fore.GREEN)
+                self.start_farming()
+            else:
+                self.log(f"Farming: {Fore.RED}Off", Fore.GREEN)
+            if config["auto_spin"]:
+                self.log("Spin: On", Fore.GREEN)
+                self.spin()
+            else:
+                self.log(f"Spin: {Fore.RED}Off", Fore.GREEN)
+            if config["auto_task"]:
+                self.log("Tasks: On", Fore.GREEN)
+                self.task()
+            else:
+                self.log(f"Tasks: {Fore.RED}Off", Fore.GREEN)
 
             index += 1 
             if index >= len(self.query_list):
                 index = 0  
-                self.log(f"Restarting In 6 hours")
-                time.sleep(6 * 3600)
+                self.log(f"Restarting In {config["delay_iteration"]} Second")
+                time.sleep(config["delay_iteration"])
 
             self.log(f"Moving to the next account....", Fore.CYAN)
             time.sleep(30)

@@ -1,13 +1,20 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.2.1
-**Versi v1.1.1 -> v1.2.1**
+## Versi v1.3.2
+**Versi v1.2.1 -> v1.3.2**
 
 ## Update
-1. Menambahkan Beberapa information tentang akun
-2. Urutan Farming dibenahi
-3. Tampilan direvisi
+1. Sekarang sudah ada `config.json`
+2. Membenahi fetching api
+
+## Setingan untuk config.json
+|Fungsi|Deskripsi|Status|
+|:-----|:------|:-----|
+|`auto_farming`|Auto claim farming|Default True|
+|`auto_spin`|Auto Spin Wheel|Default True|
+|`auto_task`|Auto Task, Basic Task, Partner Task|Default True|
+|`delay_iteration`|Delay sebelum melakukan restarting|Default 600|
 
 ## Installation
 - Buka command prompt atau terminal, lalu jalankan perintah ini:

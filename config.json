@@ -1,0 +1,6 @@
+{
+    "auto_farming": true,
+    "auto_spin": true,
+    "auto_task": true,
+    "delay_iteration": 600
+}
