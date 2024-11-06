@@ -1,12 +1,11 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.3.2
-**Versi v1.2.1 -> v1.3.2**
+## Versi v1.4.2
+**Versi v1.3.2 -> v1.4.2**
 
 ## Update
-1. Sekarang sudah ada `config.json`
-2. Membenahi fetching api
+1. Menambahkan auto campaign
 
 ## Setingan untuk config.json
 |Fungsi|Deskripsi|Status|

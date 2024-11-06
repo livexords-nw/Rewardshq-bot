@@ -29,7 +29,7 @@ class Auth:
         print("     RewardsHQ Free Bot")
         print("     This Bot Created By LIVEXORDS\n")
 
-    def load_config():
+    def load_config(self):
         """Load the configuration from config.json once at the start."""
         with open('config.json') as config_file:
             config = json.load(config_file)
@@ -268,7 +268,91 @@ class Auth:
 
         self.log(f"{len(task_ids)} tasks have been successfully claimed.")
         return task_ids
+    
+    def campain(self):
+        if not self.token:
+            self.log("No token available. Please log in first.", Fore.RED)
+            return None
 
+        headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
+
+        payload = {
+            "page": 1,
+            "limit": 10,
+            "keyword": ""
+        }
+
+        response = requests.get(f"{self.BASE_URL}/campaigns?page=1&limit=10&keyword=", headers=headers, json=payload)
+        data = []
+
+        if response.status_code != 200:
+            self.log(f"Failed to retrieve partner tasks, status code: {response.status_code}", Fore.RED)
+            return None
+        else:
+            campaigns = response.json().get("data", [])
+            campaign = campaigns.get("data", [])
+            for campaigns in campaign:
+                _id = campaigns.get("_id")
+                if _id:
+                    data.append(_id) 
+                self.log(f"Title: {campaigns.get('title')}", Fore.GREEN)
+
+        if not data:
+            self.log("No campaigns found.", Fore.YELLOW)
+            return None
+
+        campaign_ids_query = "&".join([f"campaignIds[]={_id}" for _id in data])
+        
+        user_quest_url = f"{self.BASE_URL}/user-quest/list?{campaign_ids_query}"
+        user_quest_response = requests.get(user_quest_url, headers=headers)
+
+        if user_quest_response.status_code != 200:
+            self.log(f"Failed to retrieve user quests, status code: {user_quest_response.status_code}", Fore.RED)
+            return None
+
+        time.sleep(5)
+
+        user_quests = user_quest_response.json()
+        quest_ids = []  
+
+        for quest in user_quests.get("data", []):
+            for question in quest:
+                quest_id = question.get("_id")  
+                if quest_id:
+                    quest_ids.append(quest_id)  
+                self.log(f"{question.get('name')} | Status: {question.get('status')} | ID: {quest_id}", Fore.GREEN)
+
+        time.sleep(5)
+        
+        for quest_id in quest_ids:
+            put_url = f"{self.BASE_URL}/user-quest/{quest_id}"
+            put_payload = {}  
+
+            put_response = requests.put(put_url, headers=headers, json=put_payload)
+            
+            if put_response.status_code == 200:
+                try:
+                    quest_data = put_response.json().get("data", {})
+                    metadata = quest_data.get("metadata", {})
+                    
+                    quest_title = metadata.get("name", "Unknown Title")  
+                    self.log(f"Completed quest: {quest_title}", Fore.GREEN)
+                    
+                except ValueError:
+                    self.log("Failed to parse response JSON.", Fore.RED)
+            else:
+                try:
+                    quest_data = put_response.json().get("data", {})
+                    metadata = quest_data.get("metadata", {})
+                    
+                    quest_title = metadata.get("name", "Unknown Title")
+                    self.log(f"Failed to complete quest: {quest_title}", Fore.RED)
+                    
+                except ValueError:
+                    self.log("Failed to parse response JSON.", Fore.RED)
+
+            time.sleep(5)
+        return quest_ids  
 
     def run(self):
         """Main loop to log in and process each query for up to 6 hours."""
@@ -283,16 +367,24 @@ class Auth:
                 self.start_farming()
             else:
                 self.log(f"Farming: {Fore.RED}Off", Fore.GREEN)
+
             if config["auto_spin"]:
                 self.log("Spin: On", Fore.GREEN)
                 self.spin()
             else:
                 self.log(f"Spin: {Fore.RED}Off", Fore.GREEN)
+
             if config["auto_task"]:
                 self.log("Tasks: On", Fore.GREEN)
                 self.task()
             else:
                 self.log(f"Tasks: {Fore.RED}Off", Fore.GREEN)
+
+            if config["auto_campaign"]:
+                self.log("Campaign: On", Fore.GREEN)
+                self.campain()
+            else:
+                self.log(f"Campaign: {Fore.RED}Off", Fore.GREEN)
 
             index += 1 
             if index >= len(self.query_list):
@@ -300,8 +392,10 @@ class Auth:
                 self.log(f"Restarting In {config["delay_iteration"]} Second")
                 time.sleep(config["delay_iteration"])
 
-            self.log(f"Moving to the next account in {config["delay_change_account"]}", Fore.CYAN)
+            self.log(f"Moving to the next account in {config["delay_change_account"]} Second", Fore.CYAN)
             time.sleep(config["delay_change_account"])
+
+            self.log("---------------------------------------")
 
 if __name__ == "__main__":
     auth = Auth()
