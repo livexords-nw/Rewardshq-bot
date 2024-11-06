@@ -117,7 +117,7 @@ class Auth:
             else:
                 self.log("Incomplete token in API response.", Fore.RED)
         else:
-            self.log(f"Login failed, status code: {response.status_code}", Fore.RED)
+            self.log(f"Query Expired", Fore.RED)
 
     def start_farming(self):
         """Initiate farming request if token is present."""
