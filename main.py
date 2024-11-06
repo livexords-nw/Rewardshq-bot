@@ -302,7 +302,7 @@ class Auth:
             return None
 
         campaign_ids_query = "&".join([f"campaignIds[]={_id}" for _id in data])
-        
+
         user_quest_url = f"{self.BASE_URL}/user-quest/list?{campaign_ids_query}"
         user_quest_response = requests.get(user_quest_url, headers=headers)
 
