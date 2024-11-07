@@ -147,29 +147,35 @@ class Auth:
         
         while True:
             response = requests.get(f"{self.BASE_URL}/user-spin-logs", headers=headers)
-            data = response.json().get("data", {})
-            number_of_spins = data.get("numberSpin", 0)
-            
-            if number_of_spins == 0:
-                self.log("No spin points remaining.", Fore.RED)
-                return False
-            
-            response = requests.put(f"{self.BASE_URL}/user-spin-logs", headers=headers)
-
-            if response.status_code == 200:
-                data = response.json().get("data", {})
-                points = data.get("point", 0)
-                xp = data.get("xp", 0)
-                usdt = data.get("usdt", 0)
-                response = requests.get(f"{self.BASE_URL}/user-spin-logs", headers=headers)
-                updated_data = response.json().get("data", {})
-                updated_spins = updated_data.get("numberSpin", 0)
-                self.log(f"Spin {spin_count} successful! Points: {points}, XP: {xp}, USDT: {usdt}, Spins left: {updated_spins}", Fore.GREEN)
-                spin_count += 1
+            data = response.json().get("data", None)
+            if data is None:
+                self.log("Data Erorr, try spin....", Fore.RED)
             else:
-                message = data.get("message", "Unknown error")
-                self.log(f"Spin failed at spin {spin_count}, message: {message}", Fore.RED)
-                break
+                number_of_spins = data.get("numberSpin", 0)
+                
+                if number_of_spins == 0:
+                    self.log("No spin points remaining.", Fore.RED)
+                    return False
+                
+                response = requests.put(f"{self.BASE_URL}/user-spin-logs", headers=headers)
+
+                if response.status_code == 200:
+                    data = response.json().get("data", None)
+                    if data is None:
+                        self.log("Data response erorr, try spin....", Fore.RED)
+                    else:
+                        points = data.get("point", 0)
+                        xp = data.get("xp", 0)
+                        usdt = data.get("usdt", 0)
+                        response = requests.get(f"{self.BASE_URL}/user-spin-logs", headers=headers)
+                        updated_data = response.json().get("data", {})
+                        updated_spins = updated_data.get("numberSpin", 0)
+                        self.log(f"Spin {spin_count} successful! Points: {points}, XP: {xp}, USDT: {usdt}, Spins left: {updated_spins}", Fore.GREEN)
+                    spin_count += 1
+                else:
+                    message = data.get("message", "Unknown error")
+                    self.log(f"Spin failed at spin {spin_count}, message: {message}", Fore.RED)
+                    break
 
             time.sleep(5)
 

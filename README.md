@@ -1,11 +1,11 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.5.2
-**Versi v1.4.2 -> v1.5.2**
+## Versi v1.5.3
+**Versi v1.5.2 -> v1.5.3**
 
 ## Update
-1. Menambahkan auto achievements
+1. Membenahi beberapa erorr response
 
 ## Setingan untuk config.json
 |Fungsi|Deskripsi|Status|
