@@ -1,11 +1,11 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.4.2
-**Versi v1.3.2 -> v1.4.2**
+## Versi v1.5.2
+**Versi v1.4.2 -> v1.5.2**
 
 ## Update
-1. Menambahkan auto campaign
+1. Menambahkan auto achievements
 
 ## Setingan untuk config.json
 |Fungsi|Deskripsi|Status|
@@ -14,6 +14,7 @@ Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 |`auto_spin`|Auto Spin Wheel|Default True|
 |`auto_task`|Auto Task, Basic Task, Partner Task|Default True|
 |`auto_campaign`|Auto Solve Campaign|Default True|
+|`auto_achievements`|Auto Claim Achievements|Default True|
 |`delay_change_account`|Delay sebelum berpindah ke akun lain|Default 30|
 |`delay_iteration`|Delay sebelum melakukan restarting|Default 600|
 

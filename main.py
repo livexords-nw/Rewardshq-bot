@@ -180,7 +180,7 @@ class Auth:
             return None
 
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-        task_ids = []  # To track claimed task IDs
+        task_ids = [] 
 
         # Task Tipe 1: Basic Task
         # Mengambil task ID dengan GET
@@ -354,6 +354,42 @@ class Auth:
             time.sleep(5)
         return quest_ids  
 
+    def achievements(self):
+        if not self.token:
+            self.log("No token available. Please log in first.", Fore.RED)
+            return None
+        
+        headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
+
+        response = requests.get(f"{self.BASE_URL}/tasks/one-time", headers=headers)
+
+        if response.status_code != 200:
+            self.log(f"Failed to retrieve tasks, status code: {response.status_code}", Fore.RED)
+            return
+        
+        data = response.json()
+
+        for task in data["data"]:
+            task_id = task["_id"]
+            name = task["metadata"]["name"]
+            
+            for streak in task["metadata"]["streak"]:
+                target = streak["target"]
+                
+                url = f"{self.BASE_URL}/tasks/one-time/{task_id}/{target}"
+                
+                try:
+                    post_response = requests.post(url, headers=headers)
+                    
+                    if post_response.status_code == 201:
+                        self.log(f"Successful claim achievement name: {name}, target: {target}", Fore.GREEN)
+                    else:
+                        self.log(f"Failed claim achievemetns name: {name}, target: {target}, status {post_response.status_code}", Fore.RED)
+                except requests.exceptions.RequestException as e:
+                    self.log(f"Error claiming achievement {name}, target: {target}: {e}", Fore.RED)
+                
+                time.sleep(5)
+
     def run(self):
         """Main loop to log in and process each query for up to 6 hours."""
         index = 0
@@ -385,6 +421,12 @@ class Auth:
                 self.campain()
             else:
                 self.log(f"Campaign: {Fore.RED}Off", Fore.GREEN)
+
+            if config["auto_achievements"]:
+                self.log("Achievements: On", Fore.GREEN)
+                self.achievements()
+            else:
+                self.log(f"Achievements: {Fore.RED}Off", Fore.GREEN)
 
             index += 1 
             if index >= len(self.query_list):
