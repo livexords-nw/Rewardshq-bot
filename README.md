@@ -7,6 +7,9 @@ Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 ## Update
 1. Membenahi beberapa erorr
 
+## Info
+Query expired everyday
+
 ## Setingan untuk config.json
 |Fungsi|Deskripsi|Status|
 |:-----|:------|:-----|
@@ -40,7 +43,7 @@ Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 ## Features
 1. Auto Farming
 2. Auto Spin
-3. Auto Daily Task, Basic Task
+3. Auto Daily Task, Basic Task, Partner Task
 4. Auto Campaigns
 5. Auto Claim Achievements
  
