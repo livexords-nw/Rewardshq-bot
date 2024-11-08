@@ -1,11 +1,11 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.5.3
-**Versi v1.5.2 -> v1.5.3**
+## Versi v1.5.4
+**Versi v1.5.3 -> v1.5.4**
 
 ## Update
-1. Membenahi beberapa erorr response
+1. Membenahi beberapa erorr
 
 ## Setingan untuk config.json
 |Fungsi|Deskripsi|Status|
@@ -42,10 +42,9 @@ Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 2. Auto Spin
 3. Auto Daily Task, Basic Task
 4. Auto Campaigns
-
+5. Auto Claim Achievements
+ 
 ## Coming Soon
-- Auto Partner Task
-- Auto Claim Achievements
 - Auto Claim Reff
 
 ## Kontributor

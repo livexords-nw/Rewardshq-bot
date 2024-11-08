@@ -65,10 +65,8 @@ class Auth:
 
         if response.status_code == 200:
             data = response.json().get("data", {})
-            self.log(f"Streak: {data.get("streak", 0)}")
-            self.log(f"pointBonus: {data.get("pointBonus", "N/A")}")
-            self.log(f"prevPointBonus: {data.get("prevPointBonus", 0)}")
-            self.log(f"nextPointBonus: {data.get("nextPointBonus", "N/A")}")
+            self.log(f"Streak: {data.get("streak", 0)}", Fore.YELLOW)
+            self.log(f"pointBonus: {data.get("pointBonus", "N/A")}", Fore.YELLOW)
         else:
             self.log("Failed to retrieve Login data.", Fore.RED)
 
@@ -79,8 +77,8 @@ class Auth:
 
         if response.status_code == 200:
             data = response.json().get("data", {})
-            self.log(f"Point: {data.get("point", 0)}")
-            self.log(f"referralPoint: {data.get("referralPoint", 0)}")
+            self.log(f"Point: {data.get("point", 0)}", Fore.YELLOW)
+            self.log(f"referralPoint: {data.get("referralPoint", 0)}", Fore.YELLOW)
         else:
             self.log("Failed to retrieve Point data.", Fore.RED)
 
@@ -89,7 +87,7 @@ class Auth:
         response = requests.get(f"{self.BASE_URL}/user-spin-logs", headers=headers)
         data = response.json().get("data", {})
         number_of_spins = data.get("numberSpin", 0)
-        self.log(f"Spin: {number_of_spins}")
+        self.log(f"Spin: {number_of_spins}", Fore.GREEN)
 
     def login(self, index):
         """Login using a query index and save the access token."""
