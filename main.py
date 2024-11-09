@@ -28,6 +28,7 @@ class Auth:
     def banner(self):
         print("     RewardsHQ Free Bot")
         print("     This Bot Created By LIVEXORDS\n")
+        print("     Channel: t.me/livexordsscript")
 
     def load_config(self):
         try:

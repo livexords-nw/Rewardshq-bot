@@ -51,3 +51,4 @@ Query expired everyday
 
 ## Kontributor
 This script created by livexords
+Telegram: t.me/livexordsscript
