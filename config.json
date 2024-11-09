@@ -4,6 +4,7 @@
     "auto_task": true,
     "auto_campaign": true,
     "auto_achievements": true,
+    "auto_reff": true,
     "delay_change_account": 30,
     "delay_iteration": 600
 }

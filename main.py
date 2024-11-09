@@ -292,7 +292,7 @@ class Auth:
                 if not is_completed and is_can_claim:
                     task_ids.append(task_id)
                     
-                    try:
+                    try: 
                         do_task_response = requests.post(f"{self.BASE_URL}/tasks/basic-tasks/{task_id}", headers=headers)
                     except requests.exceptions.RequestException as e:
                         self.log(f"Network error occurred: {e}", Fore.RED)
@@ -446,7 +446,51 @@ class Auth:
                     self.log("Failed to parse response JSON.", Fore.RED)
 
             time.sleep(5)
-        return quest_ids  
+        return quest_ids 
+
+    def reff(self):
+        if not self.token:
+            self.log("No token available. Please log in first.", Fore.RED)
+            return None
+
+        headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
+        reffid = []
+
+        try:
+            response = requests.get(f"{self.BASE_URL}/user-referral/list?page=1&limit=10", headers=headers, json={"page": 1,"limit": 10})
+        except requests.exceptions.RequestException as e:
+            self.log(f"Network error occurred: {e}", Fore.RED)
+            return
+        
+        if response.status_code != 200:
+            self.log(f"{response.json().get('message', None)}", Fore.RED)
+            return None
+        else:
+            responreff = response.json()
+        for resreff in responreff.get("data", {}).get("data", []):
+            reff_id = resreff.get("_id", None)
+            if reff_id is None:
+                self.log(f"{response.json().get('message', None)}", Fore.RED)
+            else:
+                reffid.append(reff_id)
+                self.log(f"{response.json().get('message', None)}", Fore.GREEN)
+                first_name = resreff.get("user", {}).get("firstName", "")
+                last_name = resreff.get("user", {}).get("lastName", "")
+                
+                self.log(f"{first_name} {last_name} | ID: {reff_id}", Fore.GREEN)
+
+        time.sleep(5)
+
+        for rffid in reffid:
+            try:
+                response = requests.put(f"{self.BASE_URL}/user-referral/boost/{rffid}", headers=headers, json={})
+            except requests.exceptions.RequestException as e:
+                self.log(f"Network error occurred: {e}", Fore.RED)
+
+            if response.status_code != 200:
+                self.log(f"{response.json().get('message', None)}", Fore.RED)
+            else:
+                self.log(f"{response.json().get('message', None)}", Fore.GREEN)
 
     def achievements(self):
         if not self.token:
@@ -506,6 +550,12 @@ class Auth:
                 self.start_farming()
             else:
                 self.log(f"Farming: {Fore.RED}Off", Fore.GREEN)
+
+            if config["auto_reff"]:
+                self.log("Reff: On", Fore.GREEN)
+                self.reff()
+            else:
+                self.log(f"Reff: {Fore.RED}Off", Fore.GREEN)
 
             if config["auto_spin"]:
                 self.log("Spin: On", Fore.GREEN)

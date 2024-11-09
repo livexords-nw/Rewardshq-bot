@@ -1,11 +1,11 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.5.4
-**Versi v1.5.3 -> v1.5.4**
+## Versi v1.6.4
+**Versi v1.5.4 -> v1.6.4**
 
 ## Update
-1. Membenahi beberapa erorr
+1. Menambahkan auto reff
 
 ## Info
 Query expired everyday
@@ -18,6 +18,7 @@ Query expired everyday
 |`auto_task`|Auto Task, Basic Task, Partner Task|Default True|
 |`auto_campaign`|Auto Solve Campaign|Default True|
 |`auto_achievements`|Auto Claim Achievements|Default True|
+|`auto_reff`|Auto reff|Default True|
 |`delay_change_account`|Delay sebelum berpindah ke akun lain|Default 30|
 |`delay_iteration`|Delay sebelum melakukan restarting|Default 600|
 
@@ -46,9 +47,7 @@ Query expired everyday
 3. Auto Daily Task, Basic Task, Partner Task
 4. Auto Campaigns
 5. Auto Claim Achievements
- 
-## Coming Soon
-- Auto Claim Reff
+6. Auto Reff
 
 ## Kontributor
 This script created by livexords
