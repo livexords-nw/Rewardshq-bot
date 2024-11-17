@@ -276,55 +276,124 @@ class Auth:
             time.sleep(5)
 
     def task(self):
-        """Claim tasks from all categories efficiently."""
+        """Claim tasks from both basic-tasks and partner-tasks categories."""
         if not self.token:
             self.log("No token available. Please log in first.", Fore.RED)
             return None
 
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-        categories = [
-            ("tasks", "Task"),
-            ("tasks/basic-tasks", "Basic Task"),
-            ("tasks/partner-tasks", "Partner Task")
-        ]
+        task_ids = [] 
 
-        claimed_task_ids = []
+        # Task Tipe 1: Basic Task
+        # Mengambil task ID dengan GET
+        self.log(f"{Fore.GREEN}Category: Task")
+        try:
+            response = requests.get(f"{self.BASE_URL}/tasks", headers=headers)
+        except requests.exceptions.RequestException as e:
+            self.log(f"Network error occurred: {e}", Fore.RED)
+            return
 
-        for endpoint, category_name in categories:
-            self.log(f"{Fore.GREEN}Category: {category_name}")
-            try:
-                response = requests.get(f"{self.BASE_URL}/{endpoint}", headers=headers)
-                if response.status_code != 200:
-                    self.log(f"Failed to retrieve {category_name.lower()}s, status code: {response.status_code}", Fore.RED)
-                    continue
+        if response.status_code != 200:
+            self.log(f"Failed to retrieve basic tasks, status code: {response.status_code}", Fore.RED)
+        else:
+            basic_tasks_data = response.json().get("data", [])
+            for task in basic_tasks_data:
+                task_id = task.get("_id")
+                is_completed = task.get("isCompleted", False)
+                is_can_claim = task.get("isCanClaim", False)
+                task_name = task.get("metadata", {}).get("name", "Unknown Task")
 
-                tasks = response.json().get("data", [])
-                for task in tasks:
-                    task_id = task.get("_id")
-                    task_name = task.get("metadata", {}).get("name", "Unknown Task")
-                    is_completed = task.get("isCompleted", False)
-                    is_can_claim = task.get("isCanClaim", False)
+                if not is_completed and is_can_claim:
+                    task_ids.append(task_id)
+                    
+                    try:
+                        do_task_response = requests.post(f"{self.BASE_URL}/tasks/do-task/{task_id}", headers=headers)
+                    except requests.exceptions.RequestException as e:
+                        self.log(f"Network error occurred: {e}", Fore.RED)
+                        return
 
-                    if is_completed or not is_can_claim:
-                        self.log(f"{category_name} '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
-                        continue
+                    if do_task_response.status_code == 200 or do_task_response.status_code == 201:
+                        self.log(f"Task '{task_name}' successfully claimed.", Fore.GREEN)
+                    else:
+                        self.log(f"Failed to complete task '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
+                    time.sleep(5)
+                else:
+                    self.log(f"Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
+
+        # Task Tipe 2: Basic Task
+        # Mengambil basic task ID dengan GET
+        self.log(f"{Fore.GREEN}Category: Basic Task")
+        try:
+            response = requests.get(f"{self.BASE_URL}/tasks/basic-tasks", headers=headers)
+        except requests.exceptions.RequestException as e:
+            self.log(f"Network error occurred: {e}", Fore.RED)
+            return
+
+        if response.status_code != 200:
+            self.log(f"Failed to retrieve basic tasks, status code: {response.status_code}", Fore.RED)
+        else:
+            partner_tasks_data = response.json().get("data", [])
+            for task in partner_tasks_data:
+                task_id = task.get("_id")
+                is_completed = task.get("isCompleted", False)
+                is_can_claim = task.get("isCanClaim", False)
+                task_name = task.get("metadata", {}).get("name", "Unknown Partner Task")
+
+                if not is_completed and is_can_claim:
+                    task_ids.append(task_id)
+                    
+                    try: 
+                        do_task_response = requests.post(f"{self.BASE_URL}/tasks/basic-tasks/{task_id}", headers=headers)
+                    except requests.exceptions.RequestException as e:
+                        self.log(f"Network error occurred: {e}", Fore.RED)
+                        return
+
+                    if do_task_response.status_code == 200 or do_task_response.status_code == 201:
+                        self.log(f"Basic Task '{task_name}' successfully claimed.", Fore.GREEN)
+                    else:
+                        self.log(f"Failed to complete basic task '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
+                    time.sleep(5)
+                else:
+                    self.log(f"Basic Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
+
+        # Task Tipe 3: Partner Task
+        # Mengambil partner task ID dengan GET
+        self.log(f"{Fore.GREEN}Category: Partner Task")
+        try:
+            response = requests.get(f"{self.BASE_URL}/tasks/partner-tasks", headers=headers)
+        except requests.exceptions.RequestException as e:
+            self.log(f"Network error occurred: {e}", Fore.RED)
+            return
+
+        if response.status_code != 200:
+            self.log(f"Failed to retrieve partner tasks, status code: {response.status_code}", Fore.RED)
+        else:
+            partner_tasks_data = response.json().get("data", [])
+            for task in partner_tasks_data:
+                task_id = task.get("_id")
+                is_completed = task.get("isCompleted", False)
+                is_can_claim = task.get("isCanClaim", False)
+                task_name = task.get("metadata", {}).get("name", "Unknown Partner Task")
+
+                if not is_completed and is_can_claim:
+                    task_ids.append(task_id)
 
                     try:
-                        do_task_response = requests.post(f"{self.BASE_URL}/{endpoint}/{task_id}", headers=headers)
-                        if do_task_response.status_code in {200, 201}:
-                            self.log(f"{category_name} '{task_name}' successfully claimed.", Fore.GREEN)
-                            claimed_task_ids.append(task_id)
-                            time.sleep(5)  # Delay only on success
-                        else:
-                            self.log(f"Failed to complete {category_name.lower()} '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
+                        do_task_response = requests.post(f"{self.BASE_URL}/tasks/partner-tasks/{task_id}", headers=headers)
                     except requests.exceptions.RequestException as e:
-                        self.log(f"Network error occurred while claiming {category_name.lower()} '{task_name}': {e}", Fore.RED)
+                        self.log(f"Network error occurred: {e}", Fore.RED)
+                        return
 
-            except requests.exceptions.RequestException as e:
-                self.log(f"Network error occurred while fetching {category_name.lower()}s: {e}", Fore.RED)
+                    if do_task_response.status_code == 200 or do_task_response.status_code == 201:
+                        self.log(f"Partner Task '{task_name}' successfully claimed.", Fore.GREEN)
+                    else:
+                        self.log(f"Failed to complete partner task '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
+                    time.sleep(5)
+                else:
+                    self.log(f"Partner Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
 
-        self.log(f"{len(claimed_task_ids)} tasks have been successfully claimed.", Fore.CYAN)
-        return claimed_task_ids
+        self.log(f"{len(task_ids)} tasks have been successfully claimed.")
+        return task_ids
     
     def campain(self):
         if not self.token:
