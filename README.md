@@ -1,11 +1,12 @@
 ## Rewardshq-bot
 Register: https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644
 
-## Versi v1.6.4
-**Versi v1.5.4 -> v1.6.4**
+## Versi v1.7.5
+**Versi v1.6.4 -> v1.7.5**
 
 ## Update
-1. Menambahkan auto reff
+1. Menambahkan save token.json
+2. Memperbaiki pemrosesan sekarang jauh lebih efisien dari pada sebelumnya
 
 ## Info
 Query expired everyday

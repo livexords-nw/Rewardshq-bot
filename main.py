@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime
 from colorama import Fore
@@ -119,16 +120,55 @@ class Auth:
             self.log(f"Index {index} out of range.", Fore.RED)
             return None
 
+        token_file = "token.json"
+
+        # Step 1: Check token.json
+        if os.path.exists(token_file):
+            try:
+                with open(token_file, "r") as file:
+                    token_data = json.load(file)
+            except (json.JSONDecodeError, IOError) as e:
+                self.log(f"Error reading token.json: {e}", Fore.RED)
+                token_data = {}
+        else:
+            token_data = {}
+
+        # Step 2: Check for existing token
+        query_key = self.query_list[index]
+        saved_token = token_data.get(query_key)  # Ambil token untuk query ini
+
+        if saved_token:  # Token ada, tetapi perlu divalidasi
+            self.token = saved_token
+            # Validasi token dengan API (misalnya panggil endpoint "validate token")
+            try:
+                response = requests.get(
+                    f"{self.BASE_URL}/auth/validate",
+                    headers={**self.headers, "Authorization": f"Bearer {self.token}"}
+                )
+                if response.status_code == 200:
+                    self.log("Token is valid, using saved token.", Fore.GREEN)
+                    self.user()
+                    self.log(f"Username: {self.username}", Fore.CYAN)
+                    self.spinPoint()
+                    self.point()
+                    self.streakLogin()
+                    return
+                else:
+                    self.log("Token is invalid, fetching new token.", Fore.YELLOW)
+            except requests.exceptions.RequestException as e:
+                self.log(f"Network error during token validation: {e}", Fore.RED)
+                return
+
+        # Step 3: Fetch token from API
         try:
             response = requests.post(
                 f"{self.BASE_URL}/auth/login",
                 headers=self.headers,
-                json={"telegramInitData": self.query_list[index]}
+                json={"telegramInitData": query_key}
             )
         except requests.exceptions.RequestException as e:
             self.log(f"Network error occurred: {e}", Fore.RED)
             return
-
 
         if response.status_code == 201:
             data = response.json().get("data", {})
@@ -136,6 +176,15 @@ class Auth:
             refresh_token = data.get("refreshToken")
             if self.token and refresh_token:
                 self.log("Login successful, token saved.", Fore.GREEN)
+
+                # Step 4: Update token.json
+                token_data[query_key] = self.token
+                try:
+                    with open(token_file, "w") as file:
+                        json.dump(token_data, file, indent=4)
+                except IOError as e:
+                    self.log(f"Error writing to token.json: {e}", Fore.RED)
+
                 self.user()
                 self.log(f"Username: {self.username}", Fore.CYAN)
                 self.spinPoint()
@@ -144,7 +193,7 @@ class Auth:
             else:
                 self.log("Incomplete token in API response.", Fore.RED)
         else:
-            self.log(f"Query Expired", Fore.RED)
+            self.log("Query expired or invalid.", Fore.RED)
 
     def start_farming(self):
         """Initiate farming request if token is present."""
@@ -177,176 +226,105 @@ class Auth:
         if not self.token:
             self.log("No token available. Please log in first.", Fore.RED)
             return None
-        
+
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-        spin_count = 1 
-        
+        spin_count = 1
+
         while True:
             try:
+                # Fetch current spin status
                 response = requests.get(f"{self.BASE_URL}/user-spin-logs", headers=headers)
-            except requests.exceptions.RequestException as e:
-                self.log(f"Network error occurred: {e}", Fore.RED)
-                return
-
-            data = response.json().get("data", None)
-            if data is None:
-                self.log("Data Erorr, try spin....", Fore.RED)
-            else:
-                number_of_spins = data.get("numberSpin", 0)
-                
-                if number_of_spins == 0:
-                    self.log("No spin points remaining.", Fore.RED)
-                    return False
-                
-                try:
-                    response = requests.put(f"{self.BASE_URL}/user-spin-logs", headers=headers)
-                except requests.exceptions.RequestException as e:
-                    self.log(f"Network error occurred: {e}", Fore.RED)
-                    return
-
-
-                if response.status_code == 200:
-                    data = response.json().get("data", None)
-                    if data is None:
-                        self.log("Data response erorr, try spin....", Fore.RED)
-                    else:
-                        points = data.get("point", 0)
-                        xp = data.get("xp", 0)
-                        usdt = data.get("usdt", 0)
-                        response = requests.get(f"{self.BASE_URL}/user-spin-logs", headers=headers)
-                        updated_data = response.json().get("data", {})
-                        updated_spins = updated_data.get("numberSpin", 0)
-                        self.log(f"Spin {spin_count} successful! Points: {points}, XP: {xp}, USDT: {usdt}, Spins left: {updated_spins}", Fore.GREEN)
-                    spin_count += 1
-                else:
-                    message = data.get("message", "Unknown error")
-                    self.log(f"Spin failed at spin {spin_count}, message: {message}", Fore.RED)
+                if response.status_code != 200:
+                    self.log(f"Failed to retrieve spin logs, status code: {response.status_code}", Fore.RED)
                     break
 
+                data = response.json().get("data", {})
+                number_of_spins = data.get("numberSpin", 0)
+
+                if number_of_spins == 0:
+                    self.log("No spin points remaining.", Fore.YELLOW)
+                    break
+
+                # Perform spin action
+                spin_response = requests.put(f"{self.BASE_URL}/user-spin-logs", headers=headers)
+                if spin_response.status_code != 200:
+                    self.log(f"Spin failed at spin {spin_count}, status code: {spin_response.status_code}", Fore.RED)
+                    break
+
+                spin_data = spin_response.json().get("data", {})
+                if not spin_data:
+                    self.log("Spin response data missing. Retrying...", Fore.RED)
+                    continue
+
+                # Extract and log results
+                points = spin_data.get("point", 0)
+                xp = spin_data.get("xp", 0)
+                usdt = spin_data.get("usdt", 0)
+                updated_spins = spin_data.get("numberSpin", number_of_spins - 1)  # Assume decrement
+
+                self.log(
+                    f"Spin {spin_count} successful! Points: {points}, XP: {xp}, USDT: {usdt}, Spins left: {updated_spins}",
+                    Fore.GREEN,
+                )
+                spin_count += 1
+
+            except requests.exceptions.RequestException as e:
+                self.log(f"Network error occurred: {e}", Fore.RED)
+                break
+
+            # Delay before the next spin
             time.sleep(5)
 
     def task(self):
-        """Claim tasks from both basic-tasks and partner-tasks categories."""
+        """Claim tasks from all categories efficiently."""
         if not self.token:
             self.log("No token available. Please log in first.", Fore.RED)
             return None
 
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-        task_ids = [] 
+        categories = [
+            ("tasks", "Task"),
+            ("tasks/basic-tasks", "Basic Task"),
+            ("tasks/partner-tasks", "Partner Task")
+        ]
 
-        # Task Tipe 1: Basic Task
-        # Mengambil task ID dengan GET
-        self.log(f"{Fore.GREEN}Category: Task")
-        try:
-            response = requests.get(f"{self.BASE_URL}/tasks", headers=headers)
-        except requests.exceptions.RequestException as e:
-            self.log(f"Network error occurred: {e}", Fore.RED)
-            return
+        claimed_task_ids = []
 
-        if response.status_code != 200:
-            self.log(f"Failed to retrieve basic tasks, status code: {response.status_code}", Fore.RED)
-        else:
-            basic_tasks_data = response.json().get("data", [])
-            for task in basic_tasks_data:
-                task_id = task.get("_id")
-                is_completed = task.get("isCompleted", False)
-                is_can_claim = task.get("isCanClaim", False)
-                task_name = task.get("metadata", {}).get("name", "Unknown Task")
+        for endpoint, category_name in categories:
+            self.log(f"{Fore.GREEN}Category: {category_name}")
+            try:
+                response = requests.get(f"{self.BASE_URL}/{endpoint}", headers=headers)
+                if response.status_code != 200:
+                    self.log(f"Failed to retrieve {category_name.lower()}s, status code: {response.status_code}", Fore.RED)
+                    continue
 
-                if not is_completed and is_can_claim:
-                    task_ids.append(task_id)
-                    
-                    try:
-                        do_task_response = requests.post(f"{self.BASE_URL}/tasks/do-task/{task_id}", headers=headers)
-                    except requests.exceptions.RequestException as e:
-                        self.log(f"Network error occurred: {e}", Fore.RED)
-                        return
+                tasks = response.json().get("data", [])
+                for task in tasks:
+                    task_id = task.get("_id")
+                    task_name = task.get("metadata", {}).get("name", "Unknown Task")
+                    is_completed = task.get("isCompleted", False)
+                    is_can_claim = task.get("isCanClaim", False)
 
-                    if do_task_response.status_code == 200 or do_task_response.status_code == 201:
-                        self.log(f"Task '{task_name}' successfully claimed.", Fore.GREEN)
-                    else:
-                        self.log(f"Failed to complete task '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
-                else:
-                    self.log(f"Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
-                
-                time.sleep(5)
-
-        # Task Tipe 2: Basic Task
-        # Mengambil basic task ID dengan GET
-        self.log(f"{Fore.GREEN}Category: Basic Task")
-        try:
-            response = requests.get(f"{self.BASE_URL}/tasks/basic-tasks", headers=headers)
-        except requests.exceptions.RequestException as e:
-            self.log(f"Network error occurred: {e}", Fore.RED)
-            return
-
-        if response.status_code != 200:
-            self.log(f"Failed to retrieve basic tasks, status code: {response.status_code}", Fore.RED)
-        else:
-            partner_tasks_data = response.json().get("data", [])
-            for task in partner_tasks_data:
-                task_id = task.get("_id")
-                is_completed = task.get("isCompleted", False)
-                is_can_claim = task.get("isCanClaim", False)
-                task_name = task.get("metadata", {}).get("name", "Unknown Partner Task")
-
-                if not is_completed and is_can_claim:
-                    task_ids.append(task_id)
-                    
-                    try: 
-                        do_task_response = requests.post(f"{self.BASE_URL}/tasks/basic-tasks/{task_id}", headers=headers)
-                    except requests.exceptions.RequestException as e:
-                        self.log(f"Network error occurred: {e}", Fore.RED)
-                        return
-
-                    if do_task_response.status_code == 200 or do_task_response.status_code == 201:
-                        self.log(f"Basic Task '{task_name}' successfully claimed.", Fore.GREEN)
-                    else:
-                        self.log(f"Failed to complete basic task '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
-                else:
-                    self.log(f"Basic Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
-
-                time.sleep(5)
-
-        # Task Tipe 3: Partner Task
-        # Mengambil partner task ID dengan GET
-        self.log(f"{Fore.GREEN}Category: Partner Task")
-        try:
-            response = requests.get(f"{self.BASE_URL}/tasks/partner-tasks", headers=headers)
-        except requests.exceptions.RequestException as e:
-            self.log(f"Network error occurred: {e}", Fore.RED)
-            return
-
-        if response.status_code != 200:
-            self.log(f"Failed to retrieve partner tasks, status code: {response.status_code}", Fore.RED)
-        else:
-            partner_tasks_data = response.json().get("data", [])
-            for task in partner_tasks_data:
-                task_id = task.get("_id")
-                is_completed = task.get("isCompleted", False)
-                is_can_claim = task.get("isCanClaim", False)
-                task_name = task.get("metadata", {}).get("name", "Unknown Partner Task")
-
-                if not is_completed and is_can_claim:
-                    task_ids.append(task_id)
+                    if is_completed or not is_can_claim:
+                        self.log(f"{category_name} '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
+                        continue
 
                     try:
-                        do_task_response = requests.post(f"{self.BASE_URL}/tasks/partner-tasks/{task_id}", headers=headers)
+                        do_task_response = requests.post(f"{self.BASE_URL}/{endpoint}/{task_id}", headers=headers)
+                        if do_task_response.status_code in {200, 201}:
+                            self.log(f"{category_name} '{task_name}' successfully claimed.", Fore.GREEN)
+                            claimed_task_ids.append(task_id)
+                            time.sleep(5)  # Delay only on success
+                        else:
+                            self.log(f"Failed to complete {category_name.lower()} '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
                     except requests.exceptions.RequestException as e:
-                        self.log(f"Network error occurred: {e}", Fore.RED)
-                        return
+                        self.log(f"Network error occurred while claiming {category_name.lower()} '{task_name}': {e}", Fore.RED)
 
-                    if do_task_response.status_code == 200 or do_task_response.status_code == 201:
-                        self.log(f"Partner Task '{task_name}' successfully claimed.", Fore.GREEN)
-                    else:
-                        self.log(f"Failed to complete partner task '{task_name}', status code: {do_task_response.status_code}", Fore.RED)
-                else:
-                    self.log(f"Partner Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
+            except requests.exceptions.RequestException as e:
+                self.log(f"Network error occurred while fetching {category_name.lower()}s: {e}", Fore.RED)
 
-                time.sleep(5)
-
-        self.log(f"{len(task_ids)} tasks have been successfully claimed.")
-        return task_ids
+        self.log(f"{len(claimed_task_ids)} tasks have been successfully claimed.", Fore.CYAN)
+        return claimed_task_ids
     
     def campain(self):
         if not self.token:
@@ -435,6 +413,7 @@ class Auth:
                     
                 except ValueError:
                     self.log("Failed to parse response JSON.", Fore.RED)
+                time.sleep(5)
             else:
                 try:
                     quest_data = put_response.json().get("data", {})
@@ -445,153 +424,159 @@ class Auth:
                     
                 except ValueError:
                     self.log("Failed to parse response JSON.", Fore.RED)
-
-            time.sleep(5)
         return quest_ids 
 
     def reff(self):
+        """Retrieve and boost referral users."""
         if not self.token:
             self.log("No token available. Please log in first.", Fore.RED)
             return None
 
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
-        reffid = []
+        referral_ids = []
 
         try:
-            response = requests.get(f"{self.BASE_URL}/user-referral/list?page=1&limit=10", headers=headers, json={"page": 1,"limit": 10})
+            # Fetch referral list
+            response = requests.get(
+                f"{self.BASE_URL}/user-referral/list",
+                headers=headers,
+                params={"page": 1, "limit": 10}
+            )
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             self.log(f"Network error occurred: {e}", Fore.RED)
             return
-        
-        if response.status_code != 200:
-            self.log(f"{response.json().get('message', None)}", Fore.RED)
+
+        referral_data = response.json().get("data", {}).get("data", [])
+        if not referral_data:
+            self.log("No referrals found.", Fore.YELLOW)
             return None
-        else:
-            responreff = response.json()
-        for resreff in responreff.get("data", {}).get("data", []):
-            reff_id = resreff.get("_id", None)
-            if reff_id is None:
-                self.log(f"{response.json().get('message', None)}", Fore.RED)
-            else:
-                reffid.append(reff_id)
-                self.log(f"{response.json().get('message', None)}", Fore.GREEN)
-                first_name = resreff.get("user", {}).get("firstName", "")
-                last_name = resreff.get("user", {}).get("lastName", "")
-                
-                self.log(f"{first_name} {last_name} | ID: {reff_id}", Fore.GREEN)
 
-        time.sleep(5)
+        # Process each referral
+        for referral in referral_data:
+            referral_id = referral.get("_id")
+            if not referral_id:
+                self.log("Invalid referral data received.", Fore.RED)
+                continue
 
-        for rffid in reffid:
+            referral_ids.append(referral_id)
+            first_name = referral.get("user", {}).get("firstName", "Unknown")
+            last_name = referral.get("user", {}).get("lastName", "Unknown")
+            self.log(f"Referral: {first_name} {last_name} | ID: {referral_id}", Fore.GREEN)
+
+        # Boost each referral
+        for referral_id in referral_ids:
             try:
-                response = requests.put(f"{self.BASE_URL}/user-referral/boost/{rffid}", headers=headers, json={})
+                response = requests.put(
+                    f"{self.BASE_URL}/user-referral/boost/{referral_id}",
+                    headers=headers
+                )
+                response.raise_for_status()
             except requests.exceptions.RequestException as e:
-                self.log(f"Network error occurred: {e}", Fore.RED)
+                self.log(f"Failed to boost referral ID {referral_id}: {e}", Fore.RED)
+                continue
 
-            if response.status_code != 200:
-                self.log(f"{response.json().get('message', None)}", Fore.RED)
-            else:
-                self.log(f"{response.json().get('message', None)}", Fore.GREEN)
+            boost_message = response.json().get("message", "Boost successful.")
+            self.log(f"Boosted referral ID {referral_id}: {boost_message}", Fore.GREEN)
+
+        return referral_ids
 
     def achievements(self):
+        """Retrieve and claim one-time achievements."""
         if not self.token:
             self.log("No token available. Please log in first.", Fore.RED)
             return None
-        
+
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
 
         try:
+            # Get one-time tasks
             response = requests.get(f"{self.BASE_URL}/tasks/one-time", headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            self.log(f"Network error occurred: {e}", Fore.RED)
+            self.log(f"Network error occurred while retrieving tasks: {e}", Fore.RED)
             return
 
-        if response.status_code != 200:
-            self.log(f"Failed to retrieve tasks, status code: {response.status_code}", Fore.RED)
-            return
-        
-        data = response.json()
+        tasks = response.json().get("data", [])
+        if not tasks:
+            self.log("No one-time tasks found.", Fore.YELLOW)
+            return None
 
-        for task in data["data"]:
-            task_id = task["_id"]
-            name = task["metadata"]["name"]
-            
-            for streak in task["metadata"]["streak"]:
-                target = streak["target"]
-                
-                url = f"{self.BASE_URL}/tasks/one-time/{task_id}/{target}"
-                
+        # Process each task
+        for task in tasks:
+            task_id = task.get("_id")
+            name = task.get("metadata", {}).get("name", "Unknown Task")
+            streaks = task.get("metadata", {}).get("streak", [])
+
+            if not streaks:
+                self.log(f"No streak targets found for task: {name} (ID: {task_id})", Fore.YELLOW)
+                continue
+
+            for streak in streaks:
+                target = streak.get("target")
+                if not target:
+                    self.log(f"Invalid streak target for task: {name} (ID: {task_id})", Fore.RED)
+                    continue
+
+                claim_url = f"{self.BASE_URL}/tasks/one-time/{task_id}/{target}"
                 try:
-                    try:
-                        post_response = requests.post(url, headers=headers)
-                    except requests.exceptions.RequestException as e:
-                        self.log(f"Network error occurred: {e}", Fore.RED)
-                        return
-
-                    
+                    # Claim the achievement
+                    post_response = requests.post(claim_url, headers=headers)
                     if post_response.status_code == 201:
-                        self.log(f"Successful claim achievement name: {name}, target: {target}", Fore.GREEN)
+                        self.log(f"Successfully claimed achievement: {name}, Target: {target}", Fore.GREEN)
                     else:
-                        self.log(f"Failed claim achievemetns name: {name}, target: {target}, status {post_response.status_code}", Fore.RED)
+                        self.log(f"Failed to claim achievement: {name}, Target: {target}, Status: {post_response.status_code}", Fore.RED)
                 except requests.exceptions.RequestException as e:
-                    self.log(f"Error claiming achievement {name}, target: {target}: {e}", Fore.RED)
-                
+                    self.log(f"Error claiming achievement {name}, Target: {target}: {e}", Fore.RED)
+
+                # Introduce a delay between requests to avoid rate-limiting
                 time.sleep(5)
+
+        return True
+
 
     def run(self):
         """Main loop to log in and process each query for up to 6 hours."""
         index = 0
         config = self.load_config()
+        total_accounts = len(self.query_list)
 
         while True:
-            self.log(f"Login To User {index+1}/{len(self.query_list)}")
+            # Log login process
+            self.log(f"Login to User {index + 1}/{total_accounts}", Fore.CYAN)
             self.login(index)
-            if config["auto_farming"]:
-                self.log("Farming: On", Fore.GREEN)
-                self.start_farming()
-            else:
-                self.log(f"Farming: {Fore.RED}Off", Fore.GREEN)
 
-            if config["auto_reff"]:
-                self.log("Reff: On", Fore.GREEN)
-                self.reff()
-            else:
-                self.log(f"Reff: {Fore.RED}Off", Fore.GREEN)
+            # Process tasks based on configuration
+            tasks = [
+                ("Farming", config["auto_farming"], self.start_farming),
+                ("Reff", config["auto_reff"], self.reff),
+                ("Spin", config["auto_spin"], self.spin),
+                ("Tasks", config["auto_task"], self.task),
+                ("Campaign", config["auto_campaign"], self.campain),
+                ("Achievements", config["auto_achievements"], self.achievements),
+            ]
 
-            if config["auto_spin"]:
-                self.log("Spin: On", Fore.GREEN)
-                self.spin()
-            else:
-                self.log(f"Spin: {Fore.RED}Off", Fore.GREEN)
+            for task_name, is_enabled, task_func in tasks:
+                if is_enabled:
+                    self.log(f"{task_name}: On", Fore.GREEN)
+                    try:
+                        task_func()
+                    except Exception as e:
+                        self.log(f"Error in {task_name}: {e}", Fore.RED)
+                else:
+                    self.log(f"{task_name}: {Fore.RED}Off", Fore.GREEN)
 
-            if config["auto_task"]:
-                self.log("Tasks: On", Fore.GREEN)
-                self.task()
-            else:
-                self.log(f"Tasks: {Fore.RED}Off", Fore.GREEN)
-
-            if config["auto_campaign"]:
-                self.log("Campaign: On", Fore.GREEN)
-                self.campain()
-            else:
-                self.log(f"Campaign: {Fore.RED}Off", Fore.GREEN)
-
-            if config["auto_achievements"]:
-                self.log("Achievements: On", Fore.GREEN)
-                self.achievements()
-            else:
-                self.log(f"Achievements: {Fore.RED}Off", Fore.GREEN)
-
-            index += 1 
-            if index >= len(self.query_list):
-                index = 0  
-                self.log(f"Restarting In {config['delay_iteration']} Second")
+            # Move to the next account
+            index += 1
+            if index >= total_accounts:
+                index = 0
+                self.log(f"Restarting in {config['delay_iteration']} seconds.", Fore.YELLOW)
                 time.sleep(config["delay_iteration"])
 
-            self.log(f"Moving to the next account in {config['delay_change_account']} Second", Fore.CYAN)
+            self.log(f"Moving to the next account in {config['delay_change_account']} seconds.", Fore.CYAN)
             time.sleep(config["delay_change_account"])
 
-            self.log("---------------------------------------")
+            self.log("---------------------------------------", Fore.MAGENTA)
 
 if __name__ == "__main__":
     auth = Auth()
