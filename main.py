@@ -5,7 +5,7 @@ from colorama import Fore
 import requests
 import json
 
-class Auth:
+class RewardsHQ:
     BASE_URL = "https://api-rewardshq.shards.tech/v1"
     headers = {
         "Accept": "application/json, text/plain, */*",
@@ -648,5 +648,5 @@ class Auth:
             self.log("---------------------------------------", Fore.MAGENTA)
 
 if __name__ == "__main__":
-    auth = Auth()
-    auth.run()
+    Rewards = RewardsHQ()
+    Rewards.run()
