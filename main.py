@@ -1,4 +1,3 @@
-import os
 import time
 from datetime import datetime
 from colorama import Fore
@@ -43,7 +42,6 @@ class RewardsHQ:
         except FileNotFoundError:
             self.log("config.json not found. Please ensure the configuration file is available.", Fore.RED)
             return {}
-
 
     def load_queries(self, file_path):
         """Load queries from a text file."""
@@ -120,40 +118,24 @@ class RewardsHQ:
             self.log(f"Index {index} out of range.", Fore.RED)
             return None
 
-        try:
-            response = requests.post(
-                f"{self.BASE_URL}/auth/login",
-                headers=self.headers,
-                json={"telegramInitData": query_key}
-            )
-        except requests.exceptions.RequestException as e:
-            self.log(f"Network error occurred: {e}", Fore.RED)
-            return
+        response = requests.post(
+            f"{self.BASE_URL}/auth/login",
+            headers=self.headers,
+            json={"telegramInitData": self.query_list[index]}
+        )
 
         if response.status_code == 201:
             data = response.json().get("data", {})
             self.token = data.get("accessToken")
             refresh_token = data.get("refreshToken")
             if self.token and refresh_token:
-                self.log("Login successful, token saved.", Fore.GREEN)
-
-                
-                token_data[query_key] = self.token
-                try:
-                    with open(token_file, "w") as file:
-                        json.dump(token_data, file, indent=4)
-                except IOError as e:
-                    self.log(f"Error writing to token.json: {e}", Fore.RED)
-
+                self.log("Login successful", Fore.GREEN)
                 self.user()
                 self.log(f"Username: {self.username}", Fore.CYAN)
-                self.spinPoint()
-                self.point()
-                self.streakLogin()
             else:
                 self.log("Incomplete token in API response.", Fore.RED)
         else:
-            self.log("Query expired or invalid.", Fore.RED)
+            self.log(f"Login failed, status code: {response.status_code}", Fore.RED)
 
     def start_farming(self):
         """Initiate farming request if token is present."""
@@ -392,57 +374,37 @@ class RewardsHQ:
             self.log(f"Network error occurred: {e}", Fore.RED)
             return
 
-
         if user_quest_response.status_code != 200:
             self.log(f"Failed to retrieve user quests, status code: {user_quest_response.status_code}", Fore.RED)
             return None
-
-        time.sleep(5)
 
         user_quests = user_quest_response.json()
         quest_ids = []  
 
         for quest in user_quests.get("data", []):
             for question in quest:
-                quest_id = question.get("_id")  
+                quest_id = question.get("_id")
+                quest_status = question.get("status", None)  
+                quest_name = question.get("name", "Unknown Name")
+
                 if quest_id:
-                    quest_ids.append(quest_id)  
-                self.log(f"{question.get('name')} | Status: {question.get('status')} | ID: {quest_id}", Fore.GREEN)
+                    quest_ids.append(quest_id)
 
-        time.sleep(5)
-        
-        for quest_id in quest_ids:
-            put_url = f"{self.BASE_URL}/user-quest/{quest_id}"
-            put_payload = {}  
-
-            try:
-                put_response = requests.put(put_url, headers=headers, json=put_payload)
-            except requests.exceptions.RequestException as e:
-                self.log(f"Network error occurred: {e}", Fore.RED)
-                return
-
-            
-            if put_response.status_code == 200:
-                try:
-                    quest_data = put_response.json().get("data", {})
-                    metadata = quest_data.get("metadata", {})
-                    
-                    quest_title = metadata.get("name", "Unknown Title")  
-                    self.log(f"Completed quest: {quest_title}", Fore.GREEN)
-                    
-                except ValueError:
-                    self.log("Failed to parse response JSON.", Fore.RED)
-                time.sleep(5)
-            else:
-                try:
-                    quest_data = put_response.json().get("data", {})
-                    metadata = quest_data.get("metadata", {})
-                    
-                    quest_title = metadata.get("name", "Unknown Title")
-                    self.log(f"Failed to complete quest: {quest_title}", Fore.RED)
-                    
-                except ValueError:
-                    self.log("Failed to parse response JSON.", Fore.RED)
+                    if quest_status is None or quest_status.lower() != "completed":
+                        self.log(f"{quest_name} | Status: {quest_status} | ID: {quest_id} - Claiming campaign", Fore.RED)
+                        
+                        claim_url = f"{self.BASE_URL}/user-quest/{quest_id}/claim"
+                        claim_payload = {}
+                        try:
+                            claim_response = requests.put(claim_url, headers=headers, json=claim_payload)
+                            if claim_response.status_code == 200:
+                                self.log(f"Campaign successfully claimed for quest: {quest_name}", Fore.GREEN)
+                            else:
+                                self.log(f"Failed to claim campaign for quest: {quest_name}", Fore.RED)
+                        except requests.exceptions.RequestException as e:
+                            self.log(f"Network error occurred while claiming campaign: {e}", Fore.RED)
+                    else:
+                        self.log(f"{quest_name} | Status: {quest_status} | ID: {quest_id} - No action needed", Fore.YELLOW)
         return quest_ids 
 
     def reff(self):
@@ -543,7 +505,6 @@ class RewardsHQ:
                     self.log(f"Error claiming achievement {name}, Target: {target}: {e}", Fore.RED)
 
         return True
-
 
     def run(self):
         """Main loop to log in and process each query for up to 6 hours."""
