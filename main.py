@@ -120,46 +120,6 @@ class RewardsHQ:
             self.log(f"Index {index} out of range.", Fore.RED)
             return None
 
-        token_file = "token.json"
-
-        # Step 1: Check token.json
-        if os.path.exists(token_file):
-            try:
-                with open(token_file, "r") as file:
-                    token_data = json.load(file)
-            except (json.JSONDecodeError, IOError) as e:
-                self.log(f"Error reading token.json: {e}", Fore.RED)
-                token_data = {}
-        else:
-            token_data = {}
-
-        # Step 2: Check for existing token
-        query_key = self.query_list[index]
-        saved_token = token_data.get(query_key)  # Ambil token untuk query ini
-
-        if saved_token:  # Token ada, tetapi perlu divalidasi
-            self.token = saved_token
-            # Validasi token dengan API (misalnya panggil endpoint "validate token")
-            try:
-                response = requests.get(
-                    f"{self.BASE_URL}/auth/validate",
-                    headers={**self.headers, "Authorization": f"Bearer {self.token}"}
-                )
-                if response.status_code == 200:
-                    self.log("Token is valid, using saved token.", Fore.GREEN)
-                    self.user()
-                    self.log(f"Username: {self.username}", Fore.CYAN)
-                    self.spinPoint()
-                    self.point()
-                    self.streakLogin()
-                    return
-                else:
-                    self.log("Token is invalid, fetching new token.", Fore.YELLOW)
-            except requests.exceptions.RequestException as e:
-                self.log(f"Network error during token validation: {e}", Fore.RED)
-                return
-
-        # Step 3: Fetch token from API
         try:
             response = requests.post(
                 f"{self.BASE_URL}/auth/login",
@@ -177,7 +137,7 @@ class RewardsHQ:
             if self.token and refresh_token:
                 self.log("Login successful, token saved.", Fore.GREEN)
 
-                # Step 4: Update token.json
+                
                 token_data[query_key] = self.token
                 try:
                     with open(token_file, "w") as file:
@@ -232,7 +192,6 @@ class RewardsHQ:
 
         while True:
             try:
-                # Fetch current spin status
                 response = requests.get(f"{self.BASE_URL}/user-spin-logs", headers=headers)
                 if response.status_code != 200:
                     self.log(f"Failed to retrieve spin logs, status code: {response.status_code}", Fore.RED)
@@ -245,7 +204,6 @@ class RewardsHQ:
                     self.log("No spin points remaining.", Fore.YELLOW)
                     break
 
-                # Perform spin action
                 spin_response = requests.put(f"{self.BASE_URL}/user-spin-logs", headers=headers)
                 if spin_response.status_code != 200:
                     self.log(f"Spin failed at spin {spin_count}, status code: {spin_response.status_code}", Fore.RED)
@@ -256,11 +214,10 @@ class RewardsHQ:
                     self.log("Spin response data missing. Retrying...", Fore.RED)
                     continue
 
-                # Extract and log results
                 points = spin_data.get("point", 0)
                 xp = spin_data.get("xp", 0)
                 usdt = spin_data.get("usdt", 0)
-                updated_spins = spin_data.get("numberSpin", number_of_spins - 1)  # Assume decrement
+                updated_spins = spin_data.get("numberSpin", number_of_spins - 1)  
 
                 self.log(
                     f"Spin {spin_count} successful! Points: {points}, XP: {xp}, USDT: {usdt}, Spins left: {updated_spins}",
@@ -272,7 +229,6 @@ class RewardsHQ:
                 self.log(f"Network error occurred: {e}", Fore.RED)
                 break
 
-            # Delay before the next spin
             time.sleep(5)
 
     def task(self):
@@ -284,8 +240,6 @@ class RewardsHQ:
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
         task_ids = [] 
 
-        # Task Tipe 1: Basic Task
-        # Mengambil task ID dengan GET
         self.log(f"{Fore.GREEN}Category: Task")
         try:
             response = requests.get(f"{self.BASE_URL}/tasks", headers=headers)
@@ -320,8 +274,6 @@ class RewardsHQ:
                 else:
                     self.log(f"Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
 
-        # Task Tipe 2: Basic Task
-        # Mengambil basic task ID dengan GET
         self.log(f"{Fore.GREEN}Category: Basic Task")
         try:
             response = requests.get(f"{self.BASE_URL}/tasks/basic-tasks", headers=headers)
@@ -356,8 +308,6 @@ class RewardsHQ:
                 else:
                     self.log(f"Basic Task '{task_name}' is either completed or cannot be claimed.", Fore.YELLOW)
 
-        # Task Tipe 3: Partner Task
-        # Mengambil partner task ID dengan GET
         self.log(f"{Fore.GREEN}Category: Partner Task")
         try:
             response = requests.get(f"{self.BASE_URL}/tasks/partner-tasks", headers=headers)
@@ -505,7 +455,6 @@ class RewardsHQ:
         referral_ids = []
 
         try:
-            # Fetch referral list
             response = requests.get(
                 f"{self.BASE_URL}/user-referral/list",
                 headers=headers,
@@ -521,7 +470,6 @@ class RewardsHQ:
             self.log("No referrals found.", Fore.YELLOW)
             return None
 
-        # Process each referral
         for referral in referral_data:
             referral_id = referral.get("_id")
             if not referral_id:
@@ -533,7 +481,6 @@ class RewardsHQ:
             last_name = referral.get("user", {}).get("lastName", "Unknown")
             self.log(f"Referral: {first_name} {last_name} | ID: {referral_id}", Fore.GREEN)
 
-        # Boost each referral
         for referral_id in referral_ids:
             try:
                 response = requests.put(
@@ -559,7 +506,6 @@ class RewardsHQ:
         headers = {**self.headers, "Authorization": f"Bearer {self.token}"}
 
         try:
-            # Get one-time tasks
             response = requests.get(f"{self.BASE_URL}/tasks/one-time", headers=headers)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
@@ -571,7 +517,6 @@ class RewardsHQ:
             self.log("No one-time tasks found.", Fore.YELLOW)
             return None
 
-        # Process each task
         for task in tasks:
             task_id = task.get("_id")
             name = task.get("metadata", {}).get("name", "Unknown Task")
@@ -589,7 +534,6 @@ class RewardsHQ:
 
                 claim_url = f"{self.BASE_URL}/tasks/one-time/{task_id}/{target}"
                 try:
-                    # Claim the achievement
                     post_response = requests.post(claim_url, headers=headers)
                     if post_response.status_code == 201:
                         self.log(f"Successfully claimed achievement: {name}, Target: {target}", Fore.GREEN)
@@ -597,9 +541,6 @@ class RewardsHQ:
                         self.log(f"Failed to claim achievement: {name}, Target: {target}, Status: {post_response.status_code}", Fore.RED)
                 except requests.exceptions.RequestException as e:
                     self.log(f"Error claiming achievement {name}, Target: {target}: {e}", Fore.RED)
-
-                # Introduce a delay between requests to avoid rate-limiting
-                time.sleep(5)
 
         return True
 
@@ -611,18 +552,16 @@ class RewardsHQ:
         total_accounts = len(self.query_list)
 
         while True:
-            # Log login process
             self.log(f"Login to User {index + 1}/{total_accounts}", Fore.CYAN)
             self.login(index)
 
-            # Process tasks based on configuration
             tasks = [
                 ("Farming", config["auto_farming"], self.start_farming),
                 ("Reff", config["auto_reff"], self.reff),
-                ("Spin", config["auto_spin"], self.spin),
                 ("Tasks", config["auto_task"], self.task),
                 ("Campaign", config["auto_campaign"], self.campain),
                 ("Achievements", config["auto_achievements"], self.achievements),
+                ("Spin", config["auto_spin"], self.spin),
             ]
 
             for task_name, is_enabled, task_func in tasks:
@@ -635,7 +574,6 @@ class RewardsHQ:
                 else:
                     self.log(f"{task_name}: {Fore.RED}Off", Fore.GREEN)
 
-            # Move to the next account
             index += 1
             if index >= total_accounts:
                 index = 0
