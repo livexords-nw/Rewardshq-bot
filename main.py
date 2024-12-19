@@ -337,12 +337,12 @@ class RewardsHQ:
         payload = {
             "page": 1,
             "limit": 10,
-            "keyword": ""
+            "filter": "going"
         }
 
         try:
-            response = requests.get(f"{self.BASE_URL}/campaigns?page=1&limit=10&keyword=", headers=headers, json=payload)
-        except requests.exceptions.RequestException as e:
+            response = requests.get(f"{self.BASE_URL}campaigns/filter?page=1&limit=10&filter=going", headers=headers, json=payload)
+        except requests.excptions.RequestException as e:
             self.log(f"Network error occurred: {e}", Fore.RED)
             return
 
