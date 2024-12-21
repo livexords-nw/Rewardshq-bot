@@ -341,7 +341,7 @@ class RewardsHQ:
         }
 
         try:
-            response = requests.get(f"{self.BASE_URL}campaigns/filter?page=1&limit=10&filter=going", headers=headers, json=payload)
+            response = requests.get(f"{self.BASE_URL}/campaigns/filter?page=1&limit=10&filter=going", headers=headers, json=payload)
         except requests.excptions.RequestException as e:
             self.log(f"Network error occurred: {e}", Fore.RED)
             return
@@ -394,9 +394,12 @@ class RewardsHQ:
                         self.log(f"{quest_name} | Status: {quest_status} | ID: {quest_id} - Claiming campaign", Fore.RED)
                         
                         claim_url = f"{self.BASE_URL}/user-quest/{quest_id}/claim"
+                        claim_url2 = f"{self.BASE_URL}/user-quest/partner/{quest_id}"
+
                         claim_payload = {}
                         try:
                             claim_response = requests.put(claim_url, headers=headers, json=claim_payload)
+                            requests.put(claim_url2, headers=headers)
                             if claim_response.status_code == 200:
                                 self.log(f"Campaign successfully claimed for quest: {quest_name}", Fore.GREEN)
                             else:
