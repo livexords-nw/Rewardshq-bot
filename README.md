@@ -2,6 +2,7 @@
 <h1 align="center">RewardsHQ Bot</h1>
 
 <p align="center">Automasi tugas RewardsHQ untuk meningkatkan efisiensi dan hasil Anda!</p>
+
 ---
 
 ## 🚀 **Tentang Bot**
