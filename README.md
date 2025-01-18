@@ -1,12 +1,14 @@
 ---
+
 <h1 align="center">RewardsHQ Bot</h1>
 
-<p align="center">Automasi tugas RewardsHQ untuk meningkatkan efisiensi dan hasil Anda!</p>
+<p align="center">Automate your RewardsHQ tasks to enhance efficiency and maximize your results!</p>
+
 ---
 
-## 🚀 **Tentang Bot**
+## 🚀 **About the Bot**
 
-Bot ini dirancang untuk mengotomatiskan berbagai tugas di RewardsHQ, seperti:
+This bot is designed to automate various tasks in RewardsHQ, such as:
 
 - **Farming**
 - **Spin Wheel**
@@ -14,21 +16,21 @@ Bot ini dirancang untuk mengotomatiskan berbagai tugas di RewardsHQ, seperti:
 - **Campaigns**
 - **Achievements**
 
-Dengan bot ini, Anda dapat menghemat waktu dan mendapatkan hasil yang optimal tanpa perlu interaksi manual.
+With this bot, you can save time and achieve optimal results without manual interaction.
 
 ---
 
-## 🌟 **Versi v1.7.9**
+## 🌟 **Version v1.7.9**
 
-### **Perubahan dari Versi Sebelumnya (v1.7.8 - v1.7.9)**:
+### **Changes from the Previous Version (v1.7.8 - v1.7.9):**
 
-1. **Pembenahan** Pergantian api campaign
+1. **Improvement** Updated campaign API.
 
 ---
 
-## 📥 **Registrasi**
+## 📥 **Registration**
 
-Daftar dan mulai gunakan RewardsHQ melalui tautan berikut:
+Sign up and start using RewardsHQ through the link below:
 
 <div align="center">
   <a href="https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644" target="_blank">
@@ -38,71 +40,71 @@ Daftar dan mulai gunakan RewardsHQ melalui tautan berikut:
 
 ---
 
-## ⚙️ **Konfigurasi `config.json`**
+## ⚙️ **Configuration `config.json`**
 
-| **Fungsi**             | **Deskripsi**                                     | **Default** |
-| ---------------------- | ------------------------------------------------- | ----------- |
-| `auto_farming`         | Klaim hasil farming secara otomatis               | `True`      |
-| `auto_spin`            | Memutar roda spin otomatis                        | `True`      |
-| `auto_task`            | Menyelesaikan semua tugas (Basic, Daily, Partner) | `True`      |
-| `auto_campaign`        | Menyelesaikan kampanye otomatis                   | `True`      |
-| `auto_achievements`    | Klaim pencapaian otomatis                         | `True`      |
-| `auto_reff`            | Mengoptimalkan sistem referral                    | `True`      |
-| `delay_change_account` | Delay sebelum pindah akun (dalam detik)           | `30`        |
-| `delay_iteration`      | Delay sebelum bot restart ulang (dalam detik)     | `600`       |
+| **Function**           | **Description**                                  | **Default** |
+| ---------------------- | ------------------------------------------------ | ----------- |
+| `auto_farming`         | Automatically claim farming results              | `True`      |
+| `auto_spin`            | Automatically spin the wheel                     | `True`      |
+| `auto_task`            | Complete all tasks (Basic, Daily, Partner)       | `True`      |
+| `auto_campaign`        | Automatically complete campaigns                 | `True`      |
+| `auto_achievements`    | Automatically claim achievements                 | `True`      |
+| `auto_reff`            | Optimize the referral system                     | `True`      |
+| `delay_change_account` | Delay before switching accounts (in seconds)     | `30`        |
+| `delay_iteration`      | Delay before restarting the bot (in seconds)     | `600`       |
 
-> **Catatan**: Pastikan file `query.txt` diperbarui setiap hari untuk kelancaran eksekusi bot.
+> **Note**: Ensure that the `query.txt` file is updated daily for smooth bot execution.
 
 ---
 
-## 📖 **Cara Instalasi**
+## 📖 **Installation Guide**
 
-1. **Clone Repository**  
-   Clone proyek ini ke komputer lokal Anda:
+1. **Clone the Repository**  
+   Clone this project to your local machine:
 
    ```bash
    git clone https://github.com/livexords-nw/Rewardshq-bot.git
    ```
 
-2. **Masuk ke Direktori Proyek**  
-   Arahkan terminal Anda ke folder proyek:
+2. **Navigate to the Project Directory**  
+   Change your terminal directory to the project folder:
 
    ```bash
    cd Rewardshq-bot
    ```
 
-3. **Instal Dependensi**  
-   Pastikan semua pustaka yang dibutuhkan telah diinstal:
+3. **Install Dependencies**  
+   Ensure all required libraries are installed:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Konfigurasi Query**  
-   Masukkan query RewardsHQ Anda ke dalam file `query.txt`.
+4. **Configure Query**  
+   Insert your RewardsHQ query into the `query.txt` file.
 
-5. **Jalankan Bot**  
-   Eksekusi bot dengan perintah berikut:
+5. **Run the Bot**  
+   Execute the bot with the following command:
    ```bash
    python main.py
    ```
 
 ---
 
-## 🚀 **Fitur Utama**
+## 🚀 **Key Features**
 
-- **Auto Farming**: Klaim hasil farming secara otomatis.
-- **Auto Spin Wheel**: Putar roda spin tanpa interaksi manual.
-- **Auto Task**: Selesaikan tugas harian, tugas dasar, dan tugas partner.
-- **Auto Campaigns**: Eksekusi semua kampanye secara otomatis.
-- **Auto Achievements**: Klaim pencapaian dengan mudah.
-- **Auto Referral**: Optimalkan potensi referral Anda.
+- **Auto Farming**: Automatically claim farming results.
+- **Auto Spin Wheel**: Spin the wheel without manual interaction.
+- **Auto Task**: Complete daily, basic, and partner tasks.
+- **Auto Campaigns**: Execute all campaigns automatically.
+- **Auto Achievements**: Easily claim achievements.
+- **Auto Referral**: Maximize your referral potential.
 
 ---
 
-## 🛠️ **Kontribusi**
+## 🛠️ **Contributions**
 
-Proyek ini dikembangkan oleh **Livexords**. Jika Anda memiliki masukan atau ingin berkontribusi, hubungi kami melalui tautan di bawah:
+This project is developed by **Livexords**. If you have any feedback or wish to contribute, contact us through the link below:
 
 <div align="center">
   <a href="https://t.me/livexordsscript" target="_blank">
