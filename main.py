@@ -369,23 +369,7 @@ class RewardsHQ:
         headers = {**self.HEADERS, "Authorization": f"Bearer {self.token}"}
 
         # ====================================================
-        # Phase 1: Initiate Farming
-        # ====================================================
-        self.log("📡 Initiating farming...", Fore.CYAN)
-        try:
-            put_response = requests.put(
-                f"{self.BASE_URL}user-earn-hour", headers=headers
-            )
-            put_response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            self.log(f"❌ Network error during farming initiation: {e}", Fore.RED)
-            return None
-        except Exception as e:
-            self.log(f"❌ Unexpected error during farming initiation: {e}", Fore.RED)
-            return None
-
-        # ====================================================
-        # Phase 2: Check Farming Status
+        # Phase 1: Check Farming Status
         # ====================================================
         self.log("📡 Checking farming status...", Fore.CYAN)
         try:
@@ -398,14 +382,45 @@ class RewardsHQ:
             self.log(f"❌ Unexpected error during farming status check: {e}", Fore.RED)
             return None
 
-        if response.status_code == 200:
-            self.log("✅ Farming request successful.", Fore.GREEN)
-            return self.decode_response(response)
-        else:
-            self.log(
-                f"❌ Farming failed, status code: {response.status_code}", Fore.RED
-            )
+        data = self.decode_response(response)
+        if not data:
+            self.log("❌ Failed to decode farming status response.", Fore.RED)
             return None
+
+        start_time = data.get("startTime")
+        end_time = data.get("endTime")
+        now = int(time.time())
+
+        self.log(f"⏱️ Farming Times -> Start: {start_time}, End: {end_time}, Now: {now}", Fore.YELLOW)
+
+        # ====================================================
+        # Phase 2: Claim & Start Farming
+        # ====================================================
+        if end_time and now >= end_time:
+            self.log("🌾 Farming is ready to be claimed. Starting new farming session...", Fore.CYAN)
+            try:
+                put_response = requests.put(
+                    f"{self.BASE_URL}user-earn-hour", headers=headers
+                )
+                put_response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                self.log(f"❌ Network error during farming initiation: {e}", Fore.RED)
+                return None
+            except Exception as e:
+                self.log(f"❌ Unexpected error during farming initiation: {e}", Fore.RED)
+                return None
+
+            if put_response.status_code == 200:
+                self.log("✅ Farming successfully restarted.", Fore.GREEN)
+                return self.decode_response(put_response)
+            else:
+                self.log(
+                    f"❌ Farming restart failed, status code: {put_response.status_code}", Fore.RED
+                )
+                return None
+        else:
+            self.log("⏳ Farming still in progress. No action needed.", Fore.BLUE)
+            return data
 
     def spin(self) -> None:
         """Perform spin actions repeatedly based solely on API response."""
