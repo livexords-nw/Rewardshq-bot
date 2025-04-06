@@ -1,10 +1,10 @@
 {
-  "auto_farming": true,
-  "auto_spin": true,
-  "auto_task": true,
-  "auto_campaign": true,
-  "auto_achievements": true,
-  "auto_reff": true,
-  "delay_change_account": 30,
-  "delay_iteration": 600
+  "farming": true,
+  "spin": true,
+  "task": true,
+  "reff": true,
+  "thread": 1,
+  "proxy": false,
+  "delay_account_switch": 10,
+  "delay_loop": 3000
 }

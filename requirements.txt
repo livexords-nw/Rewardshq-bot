@@ -1,2 +1,6 @@
 colorama
 requests
+fake-useragent
+brotli
+chardet
+urllib3

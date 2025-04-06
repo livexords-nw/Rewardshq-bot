@@ -1,115 +1,224 @@
----
-
-<h1 align="center">RewardsHQ Bot</h1>
-
-<p align="center">Automate your RewardsHQ tasks to enhance efficiency and maximize your results!</p>
 
 ---
+<h1 align="center">Rewardshq Bot</h1>
 
-## 🚀 **About the Bot**
+<p align="center">
+<strong>Boost your productivity with Rewardshq Bot – your friendly automation tool that handles key tasks with ease!</strong>
+</p>
 
-This bot is designed to automate various tasks in RewardsHQ, such as:
-
-- **Farming**
-- **Spin Wheel**
-- **Daily Tasks**
-- **Campaigns**
-- **Achievements**
-
-With this bot, you can save time and achieve optimal results without manual interaction.
-
----
-
-## 🌟 **Version v1.7.9**
-
-### **Changes from the Previous Version (v1.7.8 - v1.7.9):**
-
-1. **Improvement** Updated campaign API.
+<p align="center">
+<a href="https://github.com/livexords-nw/Rewardshq-bot-bot/actions">
+<img src="https://img.shields.io/github/actions/workflow/status/livexords-nw/Rewardshq-bot/ci.yml?branch=main" alt="Build Status" />
+</a>
+<a href="https://github.com/livexords-nw/Rewardshq-bot-bot/releases">
+<img src="https://img.shields.io/github/v/release/livexords-nw/Rewardshq-bot" alt="Latest Release" />
+</a>
+<a href="https://github.com/livexords-nw/Rewardshq-bot-bot/blob/main/LICENSE">
+<img src="https://img.shields.io/github/license/livexords-nw/Rewardshq-bot" alt="License" />
+</a>
+<a href="https://t.me/livexordsscript">
+<img src="https://img.shields.io/badge/Telegram-Join%20Group-2CA5E0?logo=telegram&style=flat" alt="Telegram Group" />
+</a>
+</p>
 
 ---
 
-## 📥 **Registration**
+## 🚀 About the Bot
 
-Sign up and start using RewardsHQ through the link below:
+Rewardshq Bot is your automation buddy designed to simplify daily operations. This bot takes over repetitive tasks so you can focus on what really matters. With Rewardshq Bot, you get:
 
-<div align="center">
-  <a href="https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644" target="_blank">
-    <img src="https://img.shields.io/static/v1?message=RewardsHQ&logo=telegram&label=&color=2CA5E0&logoColor=white&labelColor=&style=for-the-badge" height="25" alt="telegram logo" />
-  </a>
-</div>
+Berikut adalah modifikasi fitur sesuai instruksi:
 
----
+- **Claim Referral Points & Auto Spin 🚀🎰:**  
+  Automatically boost your referral points and spin for rewards.
+- **Automatically Solving Tasks 🤖:**  
+  Handle routine tasks automatically, reducing manual intervention.
+- **Automatic Farming for Abundant Harvest 🌾:**  
+  Collect resources through automated farming processes.
+- **Multi Account Support 👥:**  
+  Manage multiple accounts effortlessly with built-in multi account support.
+- **Thread System 🧵:**  
+  Run tasks concurrently with configurable threading options to improve overall performance and speed.
+- **Configurable Delays ⏱️:**  
+  Fine-tune delays between account switches and loop iterations to match your specific workflow needs.
+- **Support Proxy 🔌:**  
+  Use HTTP/HTTPS proxies to enhance your multi-account setups.
 
-## ⚙️ **Configuration `config.json`**
-
-| **Function**           | **Description**                                  | **Default** |
-| ---------------------- | ------------------------------------------------ | ----------- |
-| `auto_farming`         | Automatically claim farming results              | `True`      |
-| `auto_spin`            | Automatically spin the wheel                     | `True`      |
-| `auto_task`            | Complete all tasks (Basic, Daily, Partner)       | `True`      |
-| `auto_campaign`        | Automatically complete campaigns                 | `True`      |
-| `auto_achievements`    | Automatically claim achievements                 | `True`      |
-| `auto_reff`            | Optimize the referral system                     | `True`      |
-| `delay_change_account` | Delay before switching accounts (in seconds)     | `30`        |
-| `delay_iteration`      | Delay before restarting the bot (in seconds)     | `600`       |
-
-> **Note**: Ensure that the `query.txt` file is updated daily for smooth bot execution.
+Rewardshq Bot is built with flexibility and efficiency in mind – it's here to help you automate your operations and boost your productivity!
 
 ---
 
-## 📖 **Installation Guide**
+## 🌟 Version Updates
 
-1. **Clone the Repository**  
-   Clone this project to your local machine:
+**Current Version: v1.8.0**
+
+### v1.8.0 - Latest Update
+
+Updates include the addition of proxy support and a thread system, removal of separate campaign and achievement features (now merged into the unified task system), and overall optimization across all features.
+
+---
+
+## 📝 Register
+
+Before you start using Rewardshq-bot Bot, make sure to register your account.  
+Click the link below to get started:
+
+[🔗 Register for Rewardshq Bot](https://t.me/RewardsHQ_bot/RewardsHQ?startapp=5438209644)
+
+---
+
+## ⚙️ Configuration
+
+### Main Bot Configuration (`config.json`)
+
+```json
+{
+  "farming": true,
+  "spin": true,
+  "task": true,
+  "reff": true,
+  "thread": 1,
+  "proxy": false,
+  "delay_account_switch": 10,
+  "delay_loop": 3000
+}
+```
+
+| **Setting**            | **Description**                               | **Default Value** |
+| ---------------------- | --------------------------------------------- | ----------------- |
+| `farming`              | Automatically claim farming results           | `true`            |
+| `spin`                 | Automatically spin the wheel                  | `true`            |
+| `task`                 | Complete all tasks (Basic, Daily, Partner)    | `true`            |
+| `reff`                 | Optimize the referral system                  | `true`            |
+| `thread`               | Number of threads to run concurrently         | `1`               |
+| `proxy`                | Enable proxy usage for multi-account setups   | `false`           |
+| `delay_account_switch` | Delay (in seconds) between switching accounts | `10`              |
+| `delay_loop`           | Delay (in seconds) before the next loop       | `3000`            |
+
+---
+
+## 📅 Requirements
+
+- **Minimum Python Version:** `Python 3.9+`
+- **Required Libraries:**
+  - colorama
+  - requests
+  - fake-useragent
+  - brotli
+  - chardet
+  - urllib3
+
+These are installed automatically when running:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 📅 Installation Steps
+
+### Main Bot Installation
+
+1. **Clone the Repository**
 
    ```bash
    git clone https://github.com/livexords-nw/Rewardshq-bot.git
    ```
 
-2. **Navigate to the Project Directory**  
-   Change your terminal directory to the project folder:
+2. **Navigate to the Project Folder**
 
    ```bash
    cd Rewardshq-bot
    ```
 
-3. **Install Dependencies**  
-   Ensure all required libraries are installed:
+3. **Install Dependencies**
 
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Configure Query**  
-   Insert your RewardsHQ query into the `query.txt` file.
+4. **Configure Your Query**
 
-5. **Run the Bot**  
-   Execute the bot with the following command:
+   Create a file named `query.txt` and add your query data.
+
+5. **Set Up Proxy (Optional)**  
+   To use a proxy, create a `proxy.txt` file and add proxies in the format:
+
+   ```
+   http://username:password@ip:port
+   ```
+
+   _Only HTTP and HTTPS proxies are supported._
+
+6. **Run Bot**
+
    ```bash
    python main.py
    ```
 
 ---
 
-## 🚀 **Key Features**
+### 🔹 Want Free Proxies?
 
-- **Auto Farming**: Automatically claim farming results.
-- **Auto Spin Wheel**: Spin the wheel without manual interaction.
-- **Auto Task**: Complete daily, basic, and partner tasks.
-- **Auto Campaigns**: Execute all campaigns automatically.
-- **Auto Achievements**: Easily claim achievements.
-- **Auto Referral**: Maximize your referral potential.
+You can obtain free proxies from [Webshare.io](https://www.webshare.io/).
 
 ---
 
-## 🛠️ **Contributions**
+## 📂 Project Structure
 
-This project is developed by **Livexords**. If you have any feedback or wish to contribute, contact us through the link below:
+```
+Rewardshq-bot/
+├── config.json         # Main configuration file
+├── query.txt           # File to input your query data
+├── proxy.txt           # (Optional) File containing proxy data
+├── main.py             # Main entry point to run the bot
+├── requirements.txt    # Python dependencies
+└── README.md           # This file!
+```
+
+---
+
+## 🛠️ Contributing
+
+This project is developed by **Livexords**.  
+If you have ideas, questions, or want to contribute, please join our Telegram group for discussions and updates.  
+For contribution guidelines, please consider:
+
+- **Code Style:** Follow standard Python coding conventions.
+- **Pull Requests:** Test your changes before submitting a PR.
+- **Feature Requests & Bugs:** Report and discuss via our Telegram group.
 
 <div align="center">
   <a href="https://t.me/livexordsscript" target="_blank">
-    <img src="https://img.shields.io/static/v1?message=Livexords&logo=telegram&label=&color=2CA5E0&logoColor=white&labelColor=&style=for-the-badge" height="25" alt="telegram logo" />
+    <img src="https://img.shields.io/badge/Join-Telegram%20Group-2CA5E0?logo=telegram&style=for-the-badge" height="25" alt="Telegram Group" />
   </a>
 </div>
+
+---
+
+## 📖 License
+
+This project is licensed under the **MIT License**.  
+See the [LICENSE](LICENSE) file for more details.
+
+---
+
+## 🔍 Usage Example
+
+After installation and configuration, simply run:
+
+```bash
+python main.py
+```
+
+You should see output indicating the bot has started its operations. For further instructions or troubleshooting, please check our Telegram group or open an issue in the repository.
+
+---
+
+## 📣 Community & Support
+
+For support, updates, and feature requests, join our Telegram group.  
+This is the central hub for all discussions related to Rewardshq-bot Bot, including roadmap ideas and bug fixes.
 
 ---
